@@ -3,6 +3,8 @@ const url = "https://gist.githubusercontent.com/josejbocanegra/9a28c356416badb8f
 
 let data;
 
+let carrito = [];
+
 const nav = document.getElementsByTagName("nav")[0];
 const tipoComida = document.getElementById("tipoComida");
 const cartasComida = document.getElementById("cartasComida");
@@ -10,11 +12,12 @@ const numeroItems = document.getElementById("numeroItems");
 
 loadData();
 
+document.getElementById("fotoCarrito").onclick = loadCarrito;
+
 async function loadData() {
     // Cargo datos
     const res = await fetch(url);
     data = await res.json();
-    console.log(data);
 
     // Lleno la nav de buttons.
     for(let i = 0; i < data.length; i++) {
@@ -39,9 +42,9 @@ async function loadMenu(name) {
     cartasComida.innerHTML = "";
     
     for(let j = 0; j < menu.products.length; j++) {
-        const comida = document.createElement("div");
-        comida.innerHTML = `
-        <div class="card" style="width: 18rem">
+        const div = document.createElement("div");
+        div.innerHTML = `
+        <div id="card${j}" class="card" style="width: 18rem">
             <img class="card-img-top" src="${menu.products[j].image}" alt="Card image cap" />
             <div class="card-body">
                 <h5 class="card-title">${menu.products[j].name}</h5>
@@ -51,11 +54,12 @@ async function loadMenu(name) {
                 </p>
             </div>
         </div>`;
+        cartasComida.appendChild(div);
+        const card = document.getElementById("card"+j);
         const botonCompra = document.createElement("button");
-        botonCompra.innerHTML = `Agregar al carrito ${menu.products[j].name}`
+        botonCompra.innerHTML = `Agregar al carrito`;
         botonCompra.onclick = agregarCarrito;
-        cartasComida.appendChild(comida);
-        cartasComida.appendChild(botonCompra);
+        card.appendChild(botonCompra);
     }
 }
 
@@ -73,7 +77,58 @@ async function searchMenu(name) {
 }
 
 async function agregarCarrito(event) {
-    cuenta = parseInt(numeroItems.innerHTML) + 1;
-    numeroItems.innerHTML = cuenta + " items";
+    const nombre = event.target.parentNode.children[1].children[0].innerText;
+    const promesaTipoComida = await searchMenu(tipoComida.innerText);
+    const producto = promesaTipoComida.products.find((element) => {
+        return element.name === nombre;
+    });
+    const productoEnCarro = carrito.find((element) => {
+        return element[0] === producto;
+    })
+    if(productoEnCarro != null) {
+        productoEnCarro[1] = productoEnCarro[1] + 1; 
+    } 
+    else {
+        carrito.push([producto, 1]);
+    }
+    
+    numeroItems.innerHTML = carrito.reduce((acumulador, element) => {
+        return acumulador + element[1];
+    }, 0) + " items";
 }
 
+async function loadCarrito(event) {
+    tipoComida.innerHTML = "Order detail";
+    cartasComida.innerHTML = "";
+
+    const tablaCarrito = document.createElement("table");
+    tablaCarrito.tHead = document.createElement("tHead");
+    tablaCarrito.tHead.innerHTML = `
+    <tr>
+        <th>Item</th>
+        <th>Qty.</th>
+        <th>Description</th>
+        <th>Unit Price</th>
+        <th>Amount</th>
+        <th>Modify</th>
+    </tr>`;
+
+    tablaCarrito.appendChild(document.createElement("tBody"));
+    const tablaCarritoBody = tablaCarrito.tBodies[0];
+    console.log(tablaCarritoBody);
+
+    carrito.forEach((element) => {
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+            <th>${element[0].name}</th>
+            <th>${element[1]}</th>
+            <th>${element[0].description}</th>
+            <th>${element[0].price}</th>
+            <th>${element[0].price*element[1]}</th>
+            <th></th>
+        `;
+        tablaCarritoBody.appendChild(tr);
+    })
+
+    cartasComida.appendChild(tablaCarrito);
+}
