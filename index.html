@@ -10,14 +10,26 @@
       integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T"
       crossorigin="anonymous"
     />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Satisfy&display=swap"
+      rel="stylesheet"
+    />
+    <link href="./index.css" rel="stylesheet" />
     <title>Document</title>
   </head>
   <body>
     <header class="container">
       <div class="row">
-        <div class="col-10">Restaurant & Lounge</div>
-        <div class="col-1">
-          <img id="fotoCarrito" src="" alt="Carrito" />
+        <div id="marca" class="col-10">Restaurant & Lounge</div>
+        <div id="carritoMercado" class="col-1">
+          <img
+            id = "fotoCarrito"
+            class="img-responsive"
+            src="https://i.imgur.com/1EKrQIi.png"
+            alt="Carrito"
+          />
         </div>
         <div id="numeroItems" class="col-1">0 items</div>
       </div>
@@ -26,8 +38,7 @@
       <nav></nav>
       <div id="menu">
         <h1 id="tipoComida"></h1>
-        <div id="cartasComida" class = "row">
-        </div>
+        <div id="cartasComida" class="row"></div>
       </div>
     </main>
     <footer class="container">

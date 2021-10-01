@@ -10,6 +10,8 @@ const tipoComida = document.getElementById("tipoComida");
 const cartasComida = document.getElementById("cartasComida");
 const numeroItems = document.getElementById("numeroItems");
 
+let itemsEnCarro = 0;
+
 loadData();
 
 document.getElementById("fotoCarrito").onclick = loadCarrito;
