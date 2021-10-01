@@ -2,6 +2,10 @@ header {
     height: 100px;
 }
 
+#tipoComida {
+    text-align: center;
+}
+
 #carritoMercado {
     padding-right: 0;
     padding-left: 30px;
@@ -20,4 +24,12 @@ header {
     text-align: center;
     padding-top: 10px;
     padding-left: 0;
+}
+
+#cartasComida img {
+    height: 150px;
+}
+
+#cartasComida div {
+    height: 450px;
 }

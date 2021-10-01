@@ -67,7 +67,8 @@ async function loadMenu(name) {
 
 async function loadContent(event) {
     const name = event.target.innerHTML;
-    await loadMenu(name);
+    console.log(name);
+    loadMenu(name);
 }
 
 async function searchMenu(name) {
@@ -78,32 +79,64 @@ async function searchMenu(name) {
     }
 }
 
-async function agregarCarrito(event) {
-    const nombre = event.target.parentNode.children[1].children[0].innerText;
-    const promesaTipoComida = await searchMenu(tipoComida.innerText);
+async function searchProductType(name) {
+    for(let i = 0; i < data.length; i++) {
+        for(let j = 0; j < data[i].products.length; j++) {
+            if(data[i].products[j].name === name) {
+                return data[i];
+            }
+        }
+    }
+    return null;
+}
+
+async function modificarElementoCarrito(nombre, agregar) {
+    const promesaTipoComida = await searchProductType(nombre);
     const producto = promesaTipoComida.products.find((element) => {
         return element.name === nombre;
     });
     const productoEnCarro = carrito.find((element) => {
         return element[0] === producto;
     })
-    if(productoEnCarro != null) {
-        productoEnCarro[1] = productoEnCarro[1] + 1; 
+    if(agregar) {
+        if(productoEnCarro != null) {
+            productoEnCarro[1] = productoEnCarro[1] + 1; 
+        } 
+        else {
+            carrito.push([producto, 1]);
+        }
     } 
     else {
-        carrito.push([producto, 1]);
+        productoEnCarro[1] = productoEnCarro[1] - 1;
+        if(productoEnCarro[1] === 0) {
+            carrito = carrito.filter((element) => {
+                return productoEnCarro[0] != element[0];
+            });
+        }
     }
-    
     numeroItems.innerHTML = carrito.reduce((acumulador, element) => {
-        return acumulador + element[1];
-    }, 0) + " items";
+            return acumulador + element[1];
+        }, 0) + " items";
+}
+
+async function modificarElementoCarritoTabla(nombre, agregar) {
+    await modificarElementoCarrito(nombre, agregar);
+    const tablaCarrito = document.getElementById("tablaCarrito");
+    pintarCarrito(tablaCarrito);
+}
+
+async function agregarCarrito(event) {
+    const nombre = event.target.parentNode.children[1].children[0].innerText;
+    modificarElementoCarrito(nombre, true);
 }
 
 async function loadCarrito(event) {
+    console.log(carrito);
     tipoComida.innerHTML = "Order detail";
-    cartasComida.innerHTML = "";
-
-    const tablaCarrito = document.createElement("table");
+    cartasComida.innerHTML = `
+    <table id="tablaCarrito" class="table table-striped">
+    </table>`;
+    const tablaCarrito = document.getElementById("tablaCarrito");
     tablaCarrito.tHead = document.createElement("tHead");
     tablaCarrito.tHead.innerHTML = `
     <tr>
@@ -116,21 +149,44 @@ async function loadCarrito(event) {
     </tr>`;
 
     tablaCarrito.appendChild(document.createElement("tBody"));
-    const tablaCarritoBody = tablaCarrito.tBodies[0];
-    console.log(tablaCarritoBody);
 
+    await pintarCarrito(tablaCarrito);
+}
+
+async function pintarCarrito(tablaCarrito) {
+    const tablaCarritoBody = tablaCarrito.tBodies[0];
+    tablaCarritoBody.innerHTML = "";
     carrito.forEach((element) => {
         const tr = document.createElement("tr");
         tr.innerHTML = `
-            <th>${element[0].name}</th>
-            <th>${element[1]}</th>
-            <th>${element[0].description}</th>
-            <th>${element[0].price}</th>
-            <th>${element[0].price*element[1]}</th>
-            <th></th>
+            <td>${element[0].name}</td>
+            <td>${element[1]}</td>
+            <td>${element[0].description}</td>
+            <td>${element[0].price}</td>
+            <td>${element[0].price*element[1]}</td>
+            <td class = "row">
+                <button class="col-6 btn btn-dark">+</button>
+                <button class="col-6 btn btn-dark">-</button>
+            </td>
         `;
         tablaCarritoBody.appendChild(tr);
-    })
+    });
 
-    cartasComida.appendChild(tablaCarrito);
+    const botones = tablaCarrito.getElementsByTagName("button");
+    for(let i = 0; i < botones.length; i++) {
+        if(i%2 === 0) {
+            botones[i].onclick = aumentar;
+        }
+        else {
+            botones[i].onclick = disminuir;
+        }
+    }
+}
+
+async function aumentar(event) {
+    modificarElementoCarritoTabla(event.target.parentNode.parentNode.children[0].innerText, true);
+}
+
+async function disminuir(event) {
+    modificarElementoCarritoTabla(event.target.parentNode.parentNode.children[0].innerText, false);
 }
